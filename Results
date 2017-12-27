@@ -1,0 +1,45 @@
+% Results
+% Function to get the Posterior properties, here mean and stddev of x, y
+% 
+% Usage: retval = Results (Samples, logZ)
+%
+% Where: 
+%   there are no return values
+%
+% The Promblem:
+%   Get the Postior properites of the mean and stdev
+%
+% Inputs to the Promblem:
+%   Samples - Objects defining posterior
+%   logz - Evidence
+%
+% Outputs to the Promblem:
+%   x, xx - first and second moments if x
+%   y, yy - first and second moments of y
+%   w - Proportional weight
+%
+% Originally written in C
+% Modified: 
+%           William Dahl
+%           10 December 2017 
+%           Converted to Matlab
+
+function Results (Samples, nest, logZ)
+% Samples are the posterior objects
+x=0.0;
+xx=0.0;
+y=0.0;
+yy=0.0;
+w=0.0;
+for i = 1:nest
+  w = exp(Samples(i).logWt - logZ);
+  x  = x + w * Samples(i).x;
+  xx = xx + w * (Samples(i).x)^2;
+  y  = y + w * Samples(i).y;
+  yy = yy + w * (Samples(i).y)^2;
+end
+
+fprintf("Mean x = %g, stddev(x) = %g\n", x, sqrt(xx-x*x));
+fprintf("Mean y = %g, stddev(y) = %g\n", y, sqrt(yy-y*y));
+
+return
