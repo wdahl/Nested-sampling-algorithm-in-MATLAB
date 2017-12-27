@@ -1,0 +1,60 @@
+% Explore
+% Function to Evolve object within likihood constant
+% 
+% Usage: newObj = Explore (obj, logLstar, D)
+%
+% Where: 
+%   newObj - Returns the object being evolved
+%
+% The Promblem:
+%   Evolve the object within the likihood constant
+%
+% Inputs to the Promblem:
+%   obj - object to be evolved
+%   logLstar - likihood constraint
+%   D - data
+%
+% Outputs to the Promblem:
+%   step - Initial guess suitable step - size
+%   m - MCMC counter
+%   accept - # MCMC acceptions
+%   reject - # MCMC rejections
+%
+% Originally written in C
+% Modified: 
+%           William Dahl
+%           10 December 2017 
+%           Converted to Matlab
+
+function newObj = Explore (Obj, logLstar)
+
+step = 0.1;
+m = 20;     % MCMC counter
+accept = 0; % MCMC acceptances
+reject = 0;
+newObj = Obj;
+tryObj = Obj;
+while m > 0
+  tryObj.u = Obj.u + step * (2.*rand()-1);
+  tryObj.v = Obj.v + step * (2. *rand()-1);
+  tryObj.u = tryObj.u - floor(tryObj.u);              % wrap [0,1]
+  tryObj.v = tryObj.v - floor(tryObj.v);              % wrap [0,1]
+  tryObj.x = 4. * tryObj.u - 2;             % map to x
+  tryObj.y = 2. * tryObj.v;
+  tryObj.logL = logLhood(tryObj.x, tryObj.y);
+  
+  if (tryObj.logL > logLstar)
+    newObj = tryObj;
+    accept = accept + 1;
+  else
+    reject = reject + 1;
+  end
+  
+  if (accept > reject)
+    step  = step * exp(1.0/accept);
+  elseif (accept < reject)
+    step = step / exp(1.0/reject);
+  end
+  m = m - 1;
+end
+return
